@@ -33,6 +33,7 @@ import javax.ws.rs.core.*;
 
 
 public class VerifyEmailOptional extends VerifyEmail {
+    private static final String EMAIL_VERIFY_SESSION_KEY = "SKIP_EMAIL_VERIFY";
     private static final Logger logger = Logger.getLogger(VerifyEmailOptional.class);
     private static final VerifyEmailOptional SINGLETON = new VerifyEmailOptional();
 
@@ -40,7 +41,7 @@ public class VerifyEmailOptional extends VerifyEmail {
     public void evaluateTriggers(RequiredActionContext context) {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
-        if (!context.getUser().isEmailVerified() && authSession.getAuthNote("SKIP_EMAIL_VERIFY") == null) {
+        if (!context.getUser().isEmailVerified() && authSession.getAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY) == null) {
             context.getUser().addRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
             logger.debug("User is required to verify email");
         }
@@ -53,17 +54,17 @@ public class VerifyEmailOptional extends VerifyEmail {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         String email = context.getUser().getEmail();
 
-        if (Objects.equals(authSession.getAuthNote("SKIP_EMAIL_VERIFY"), email) || context.getUser().isEmailVerified()) {
+        if (Objects.equals(authSession.getAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY), email) || context.getUser().isEmailVerified()) {
             logger.debug("SKIP_EMAIL_VERIFY or email is verified");
             context.success();
 
             authSession.removeAuthNote(Constants.VERIFY_EMAIL_KEY);
-            authSession.removeAuthNote("SKIP_EMAIL_VERIFY");
+            authSession.removeAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY);
             return;
         }
 
 
-        if (Objects.equals(authSession.getAuthNote("SKIP_EMAIL_VERIFY"), email) || Validation.isBlank(email)) {
+        if (Objects.equals(authSession.getAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY), email) || Validation.isBlank(email)) {
             logger.debug("Context ignored, either email is blank or user wants to skip validation");
             context.ignore();
             return;
@@ -80,7 +81,7 @@ public class VerifyEmailOptional extends VerifyEmail {
         } else {
             challenge = loginFormsProvider.createResponse(UserModel.RequiredAction.VERIFY_EMAIL);
         }
-        authSession.setAuthNote("SKIP_EMAIL_VERIFY", email);
+        authSession.setAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY, email);
         context.challenge(challenge);
     }
 
