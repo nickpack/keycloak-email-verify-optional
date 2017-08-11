@@ -8,7 +8,9 @@ import org.jboss.logging.Logger;
 
 import javax.ws.rs.core.Response;
 
+import org.keycloak.Config;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.authentication.requiredactions.VerifyEmail;
 import org.keycloak.common.util.Time;
@@ -32,6 +34,7 @@ import javax.ws.rs.core.*;
 
 public class VerifyEmailOptional extends VerifyEmail {
     private static final Logger logger = Logger.getLogger(VerifyEmailOptional.class);
+    private static final VerifyEmailOptional SINGLETON = new VerifyEmailOptional();
 
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
@@ -115,5 +118,36 @@ public class VerifyEmailOptional extends VerifyEmail {
         }
 
         return forms.createResponse(UserModel.RequiredAction.VERIFY_EMAIL);
+    }
+
+    @Override
+    public RequiredActionProvider create(KeycloakSession session) {
+        return SINGLETON;
+    }
+
+
+    @Override
+    public String getId() {
+        return "verify_email_optional";
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Optional Email Validation";
+    }
+
+    @Override
+    public void init(Config.Scope config) {
+
+    }
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory) {
+
+    }
+
+    @Override
+    public void close() {
+
     }
 }
