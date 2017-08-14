@@ -92,7 +92,7 @@ public class VerifyEmailOptional extends VerifyEmail {
 
         // This will allow user to re-send email again
         context.getAuthenticationSession().removeAuthNote(Constants.VERIFY_EMAIL_KEY);
-
+        context.getAuthenticationSession().removeAuthNote(VerifyEmailOptional.EMAIL_VERIFY_SESSION_KEY);
         requiredActionChallenge(context);
     }
 
